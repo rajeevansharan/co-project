@@ -1,28 +1,62 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Palette, Clock, ClipboardList, ArrowRight } from 'lucide-react';
 
-const stats = [
-    { label: 'Total Temples', value: '1,248', change: '+12 this month', icon: <Building2 size={22} className="text-primary-light" />, colorClass: 'bg-primary-glow border-primary/30 text-primary-light' },
-    { label: 'Total Artists', value: '3,571', change: '+47 this month', icon: <Palette size={22} className="text-accent-light" />, colorClass: 'bg-accent-glow border-accent/30 text-accent-light' },
-    { label: 'Pending Approvals', value: '34', change: '8 urgent', icon: <Clock size={22} className="text-orange-400" />, colorClass: 'bg-orange-500/10 border-orange-500/30 text-orange-400' },
-    { label: 'Recent Registrations', value: '89', change: 'Last 30 days', icon: <ClipboardList size={22} className="text-green-400" />, colorClass: 'bg-green-500/10 border-green-500/30 text-green-400' },
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const recentTemples = [
-    { id: 'TMP-2026-001', name: 'Sri Murugan Temple', district: 'Jaffna', status: 'Approved', date: '2026-06-20' },
-    { id: 'TMP-2026-002', name: 'Koneswaram Temple', district: 'Trincomalee', status: 'Pending', date: '2026-06-22' },
-    { id: 'TMP-2026-003', name: 'Nainativu Nagapooshani', district: 'Kilinochchi', status: 'Approved', date: '2026-06-23' },
-    { id: 'TMP-2026-004', name: 'Sri Veeramakaliamman', district: 'Batticaloa', status: 'Review', date: '2026-06-24' },
-];
+interface StatsData {
+    totalTemples: number;
+    totalArtists: number;
+    pendingApprovals: number;
+    recentRegistrations: number;
+}
 
-const recentArtists = [
-    { nic: '199845623412', name: 'Ravindran Suresh', category: 'Classical Dance', status: 'Approved', date: '2026-06-21' },
-    { nic: '200012346789', name: 'Meenakshi Priya', category: 'Carnatic Music', status: 'Pending', date: '2026-06-23' },
-    { nic: '197832156789', name: 'Ananthan Kumar', category: 'Tamil Literature', status: 'Approved', date: '2026-06-24' },
-];
+interface RecentTemple {
+    templeRegNo: string;
+    templeName: string;
+    district: string;
+    status: string;
+    createdAt: string;
+}
+
+interface RecentArtist {
+    nic: string;
+    englishName: string;
+    category: string;
+    status: string;
+    registeredDate: string;
+}
 
 export default function Dashboard() {
     const navigate = useNavigate();
+
+    const [stats, setStats] = useState<StatsData>({ totalTemples: 0, totalArtists: 0, pendingApprovals: 0, recentRegistrations: 0 });
+    const [recentTemples, setRecentTemples] = useState<RecentTemple[]>([]);
+    const [recentArtists, setRecentArtists] = useState<RecentArtist[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([
+            fetch(`${API_URL}/api/dashboard/stats`).then(r => r.json()),
+            fetch(`${API_URL}/api/dashboard/recent`).then(r => r.json()),
+        ]).then(([statsRes, recentRes]) => {
+            if (statsRes.success) setStats(statsRes.data);
+            if (recentRes.success) {
+                setRecentTemples(recentRes.data.recentTemples || []);
+                setRecentArtists(recentRes.data.recentArtists || []);
+            }
+        }).catch(() => {
+            // API offline — keep zero defaults (frontend works standalone)
+        }).finally(() => setLoading(false));
+    }, []);
+
+    const statCards = [
+        { label: 'Total Temples', value: stats.totalTemples.toLocaleString(), change: 'Registered', icon: <Building2 size={22} className="text-primary-light" />, colorClass: 'bg-primary-glow border-primary/30 text-primary-light' },
+        { label: 'Total Artists', value: stats.totalArtists.toLocaleString(), change: 'Registered', icon: <Palette size={22} className="text-accent-light" />, colorClass: 'bg-accent-glow border-accent/30 text-accent-light' },
+        { label: 'Pending Approvals', value: stats.pendingApprovals.toLocaleString(), change: 'Awaiting review', icon: <Clock size={22} className="text-orange-400" />, colorClass: 'bg-orange-500/10 border-orange-500/30 text-orange-400' },
+        { label: 'Recent Registrations', value: stats.recentRegistrations.toLocaleString(), change: 'Last 30 days', icon: <ClipboardList size={22} className="text-green-400" />, colorClass: 'bg-green-500/10 border-green-500/30 text-green-400' },
+    ];
+
     return (
         <div className="p-5 md:p-8 flex flex-col gap-7 max-w-6xl w-full">
             {/* Page Header */}
@@ -34,28 +68,20 @@ export default function Dashboard() {
                     <p className="text-[13px] text-text-muted">Department of Hindu Religious &amp; Cultural Affairs — Sri Lanka</p>
                 </div>
                 <div className="flex flex-col md:flex-row gap-2.5">
-                    <button className="btn-secondary" onClick={() => navigate('/temple-register')}>
-                        + Register Temple
-                    </button>
-                    <button className="btn-primary" onClick={() => navigate('/artist-register')}>
-                        + Register Artist
-                    </button>
+                    <button className="btn-secondary" onClick={() => navigate('/temple-register')}>+ Register Temple</button>
+                    <button className="btn-primary" onClick={() => navigate('/artist-register')}>+ Register Artist</button>
                 </div>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {stats.map((stat, i) => (
-                    <div
-                        key={stat.label}
-                        className="glass-card p-5 flex items-center gap-4 animate-fade-up cursor-default"
-                        style={{ animationDelay: `${i * 0.08}s`, animationFillMode: 'both' }}
-                    >
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[22px] shrink-0 border ${stat.colorClass}`}>
-                            {stat.icon}
-                        </div>
+                {statCards.map((stat, i) => (
+                    <div key={stat.label} className="glass-card p-5 flex items-center gap-4 animate-fade-up cursor-default" style={{ animationDelay: `${i * 0.08}s`, animationFillMode: 'both' }}>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[22px] shrink-0 border ${stat.colorClass}`}>{stat.icon}</div>
                         <div className="flex flex-col gap-0.5 min-w-0">
-                            <span className="text-2xl font-extrabold text-text-heading leading-none">{stat.value}</span>
+                            {loading
+                                ? <div className="h-7 w-14 bg-gradient-to-r from-bg-3 via-black/5 to-bg-3 animate-pulse rounded mb-1" />
+                                : <span className="text-2xl font-extrabold text-text-heading leading-none">{stat.value}</span>}
                             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">{stat.label}</span>
                             <span className="text-[11px] text-green-400 mt-0.5">{stat.change}</span>
                         </div>
@@ -72,9 +98,7 @@ export default function Dashboard() {
                             <h3 className="text-[15px] font-bold text-text-heading mb-0.5">Recent Temple Registrations</h3>
                             <p className="text-xs text-text-muted">Latest temple applications</p>
                         </div>
-                        <button className="btn-secondary px-3.5 py-1.5 text-xs" onClick={() => navigate('/temple-search')}>
-                            View All
-                        </button>
+                        <button className="btn-secondary px-3.5 py-1.5 text-xs" onClick={() => navigate('/temple-search')}>View All</button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-[13px]">
@@ -88,15 +112,18 @@ export default function Dashboard() {
                                 </tr>
                             </thead>
                             <tbody>
+                                {recentTemples.length === 0 && !loading && (
+                                    <tr><td colSpan={5} className="p-4 text-center text-xs text-text-muted">No records yet</td></tr>
+                                )}
                                 {recentTemples.map((t) => (
-                                    <tr key={t.id} className="cursor-pointer transition-colors hover:bg-primary/5" onClick={() => navigate('/temple-search')}>
+                                    <tr key={t.templeRegNo} className="cursor-pointer transition-colors hover:bg-primary/5" onClick={() => navigate('/temple-search')}>
                                         <td className="p-2.5 whitespace-nowrap border-b border-black/5">
-                                            <span className="font-mono text-[11px] bg-bg-3 border border-border rounded px-1.5 py-0.5 text-primary-light">{t.id}</span>
+                                            <span className="font-mono text-[11px] bg-bg-3 border border-border rounded px-1.5 py-0.5 text-primary-light">{t.templeRegNo}</span>
                                         </td>
-                                        <td className="p-2.5 whitespace-nowrap border-b border-black/5 font-medium text-text-heading max-w-[160px] truncate">{t.name}</td>
+                                        <td className="p-2.5 whitespace-nowrap border-b border-black/5 font-medium text-text-heading max-w-[160px] truncate">{t.templeName}</td>
                                         <td className="p-2.5 whitespace-nowrap border-b border-black/5">{t.district}</td>
                                         <td className="p-2.5 whitespace-nowrap border-b border-black/5"><StatusBadge status={t.status} /></td>
-                                        <td className="p-2.5 whitespace-nowrap border-b border-black/5 text-xs text-text-muted">{t.date}</td>
+                                        <td className="p-2.5 whitespace-nowrap border-b border-black/5 text-xs text-text-muted">{new Date(t.createdAt).toLocaleDateString()}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -111,9 +138,7 @@ export default function Dashboard() {
                             <h3 className="text-[15px] font-bold text-text-heading mb-0.5">Recent Artist Registrations</h3>
                             <p className="text-xs text-text-muted">Latest artist applications</p>
                         </div>
-                        <button className="btn-secondary px-3.5 py-1.5 text-xs" onClick={() => navigate('/artist-search')}>
-                            View All
-                        </button>
+                        <button className="btn-secondary px-3.5 py-1.5 text-xs" onClick={() => navigate('/artist-search')}>View All</button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-[13px]">
@@ -127,15 +152,18 @@ export default function Dashboard() {
                                 </tr>
                             </thead>
                             <tbody>
+                                {recentArtists.length === 0 && !loading && (
+                                    <tr><td colSpan={5} className="p-4 text-center text-xs text-text-muted">No records yet</td></tr>
+                                )}
                                 {recentArtists.map((a) => (
                                     <tr key={a.nic} className="cursor-pointer transition-colors hover:bg-primary/5" onClick={() => navigate('/artist-search')}>
                                         <td className="p-2.5 whitespace-nowrap border-b border-black/5">
                                             <span className="font-mono text-[10px] bg-bg-3 border border-border rounded px-1.5 py-0.5 text-primary-light">{a.nic}</span>
                                         </td>
-                                        <td className="p-2.5 whitespace-nowrap border-b border-black/5 font-medium text-text-heading max-w-[160px] truncate">{a.name}</td>
+                                        <td className="p-2.5 whitespace-nowrap border-b border-black/5 font-medium text-text-heading max-w-[160px] truncate">{a.englishName}</td>
                                         <td className="p-2.5 whitespace-nowrap border-b border-black/5">{a.category}</td>
                                         <td className="p-2.5 whitespace-nowrap border-b border-black/5"><StatusBadge status={a.status} /></td>
-                                        <td className="p-2.5 whitespace-nowrap border-b border-black/5 text-xs text-text-muted">{a.date}</td>
+                                        <td className="p-2.5 whitespace-nowrap border-b border-black/5 text-xs text-text-muted">{new Date(a.registeredDate).toLocaleDateString()}</td>
                                     </tr>
                                 ))}
                             </tbody>

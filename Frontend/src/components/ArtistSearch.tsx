@@ -1,18 +1,24 @@
 import { useState } from 'react';
 import { Palette, Search, MapPin, Phone, User, FileText, ArrowLeft, GraduationCap, Briefcase, Award, BookOpen } from 'lucide-react';
 
-/* ── Mock Data ─────────────────── */
-const mockArtists: Record<string, ArtistProfile> = {
-    '199845623412': {
-        nic: '199845623412', tamilName: 'இரவீந்திரன் சுரேஷ்', englishName: 'Ravindran Suresh', otherNames: 'Ravi', dob: '1998-03-14', age: 28, gender: 'Male', permanentAddress: '12, Raja Mawatha, Nallur, Jaffna', currentAddress: '45, Temple Road, Colombo 15', phone: '077-123-4567', education: 'B.A. (Fine Arts) — University of Jaffna\nDiploma in Classical Dance — Lalitha Kala Akademi', category: 'Classical Dance', literaryCategory: '', expertise: 'Bharatanatyam, Kuchipudi', servicePeriod: '2010 – Present (16 years)', biography: 'Ravindran Suresh is a distinguished classical dance artist from Jaffna who has dedicated over 16 years to preserving and promoting Bharatanatyam. He has performed at national and international stages promoting Sri Lankan Tamil cultural heritage.', publications: [], artisticWorks: ['Siva Thandavam (2015)', 'Murugan Leela (2018)', 'Shakti (2022)'], awards: [{ name: 'National Cultural Award', year: 2020 }, { name: 'Best Performer – Jaffna Arts Festival', year: 2019 }], recognitions: ['UNESCO Cultural Ambassador 2021', 'Presidential Award for Arts 2022'], status: 'Approved', registeredDate: '2026-06-21',
-    },
-    '200012346789': {
-        nic: '200012346789', tamilName: 'மீனாட்சி பிரியா', englishName: 'Meenakshi Priya', otherNames: '', dob: '2000-08-22', age: 25, gender: 'Female', permanentAddress: '78, Main Street, Batticaloa', currentAddress: '78, Main Street, Batticaloa', phone: '065-234-5678', education: 'B.Mus. — Eastern University Sri Lanka\nGrade 8 Trinity College London (Carnatic Vocals)', category: 'Music', literaryCategory: 'Tamil Poetry', expertise: 'Carnatic Music, Tamil Devotional Songs', servicePeriod: '2015 – Present (11 years)', biography: 'Meenakshi Priya is a celebrated Carnatic vocalist from Batticaloa who has been performing since the age of 15. She is known for her soul-stirring devotional music.', publications: ['Swaramalai (Tamil Poetry Collection, 2023)'], artisticWorks: ['Divya Prabandham Renditions (2021)', 'Navratri Special Concert (2023)'], awards: [{ name: 'Eastern Province Youth Award', year: 2022 }], recognitions: ['Best Vocalist – Sri Lanka Tamil Music Awards 2023'], status: 'Pending', registeredDate: '2026-06-23',
-    },
-};
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+export interface ArtistAchievement {
+    id: number; artistId: number; title: string; year: number | null; description: string | null; type: string;
+}
+
+export interface ArtistAward {
+    id: number; artistId: number; awardName: string; year: number;
+}
 
 export interface ArtistProfile {
-    nic: string; tamilName: string; englishName: string; otherNames: string; dob: string; age: number; gender: string; permanentAddress: string; currentAddress: string; phone: string; education: string; category: string; literaryCategory: string; expertise: string; servicePeriod: string; biography: string; publications: string[]; artisticWorks: string[]; awards: { name: string; year: number }[]; recognitions: string[]; status: string; registeredDate: string;
+    id: number; nic: string; tamilName: string; englishName: string; otherNames: string | null;
+    dob: string; gender: string; permanentAddress: string; currentAddress: string | null;
+    phone: string; education: string; category: string; literaryCategory: string | null;
+    expertise: string | null; servicePeriod: string | null; biography: string;
+    status: string; registeredDate: string;
+    achievements: ArtistAchievement[];
+    awards: ArtistAward[];
 }
 
 export default function ArtistSearch() {
@@ -22,14 +28,22 @@ export default function ArtistSearch() {
     const [loading, setLoading] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
 
-    const handleSearch = () => {
+    const handleSearch = async () => {
         if (!query.trim()) return;
         setLoading(true); setNotFound(false); setResult(null); setShowProfile(false);
-        setTimeout(() => {
-            const found = mockArtists[query.trim()];
-            if (found) setResult(found); else setNotFound(true);
+        try {
+            const res = await fetch(`${API_URL}/api/artists/${query.trim()}`);
+            const json = await res.json();
+            if (res.ok && json.success) {
+                setResult(json.data);
+            } else {
+                setNotFound(true);
+            }
+        } catch {
+            setNotFound(true);
+        } finally {
             setLoading(false);
-        }, 700);
+        }
     };
 
     const handleKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter') handleSearch(); };
@@ -104,12 +118,12 @@ export default function ArtistSearch() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <ResultField label={<><MapPin size={12} className="inline mr-1 mb-0.5" /> Address</>} value={result.currentAddress} />
+                        <ResultField label={<><MapPin size={12} className="inline mr-1 mb-0.5" /> Address</>} value={result.currentAddress ?? result.permanentAddress} />
                         <ResultField label={<><Palette size={12} className="inline mr-1 mb-0.5" /> Category</>} value={result.category} />
-                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> Age</>} value={`${result.age} years`} />
+                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> Gender</>} value={result.gender} />
                         <ResultField label={<><Phone size={12} className="inline mr-1 mb-0.5" /> Phone</>} value={result.phone} />
                         <ResultField label={<><GraduationCap size={12} className="inline mr-1 mb-0.5" /> Education</>} value={result.education.split('\n')[0]} />
-                        <ResultField label={<><Briefcase size={12} className="inline mr-1 mb-0.5" /> Service Period</>} value={result.servicePeriod} />
+                        <ResultField label={<><Briefcase size={12} className="inline mr-1 mb-0.5" /> Service Period</>} value={result.servicePeriod ?? '—'} />
                     </div>
 
                     <div className="flex items-center gap-3 pt-1">
@@ -149,19 +163,62 @@ function ArtistFullProfile({ artist, onBack }: { artist: ArtistProfile; onBack: 
                     <h2 className="text-[22px] font-extrabold text-text-heading mb-1">{artist.englishName}</h2>
                     <p className="text-[15px] text-text-muted mb-1" style={{ fontFamily: "'Noto Sans Tamil', sans-serif" }}>{artist.tamilName}</p>
                     {artist.otherNames && <p className="text-[13px] text-text-muted mb-1">Also known as: {artist.otherNames}</p>}
-                    <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap text-xs text-text-muted mt-1.5">
-                        <span>NIC: {artist.nic}</span><span>•</span><span>{artist.category}</span><span>•</span><span>Registered: {artist.registeredDate}</span>
-                    </div>
+                    {(() => {
+                        const works = artist.achievements.filter(a => a.type === 'Artistic Work');
+                        return works.length > 0 ? (
+                            <ProfileSection title={<><Briefcase size={16} className="inline mr-1.5 mb-0.5" /> Artistic Works</>} wide>
+                                <div className="flex flex-wrap gap-2">
+                                    {works.map((w) => <span key={w.id} className="text-xs px-2.5 py-1 bg-primary-glow text-primary-light border border-primary/30 rounded-full">{w.title}{w.year ? ` (${w.year})` : ''}</span>)}
+                                </div>
+                            </ProfileSection>
+                        ) : null;
+                    })()}
+
+                    {(() => {
+                        const pubs = artist.achievements.filter(a => a.type === 'Publication');
+                        return pubs.length > 0 ? (
+                            <ProfileSection title={<><BookOpen size={16} className="inline mr-1.5 mb-0.5" /> Publications</>} wide>
+                                <ul className="pl-4 flex flex-col gap-1.5 list-disc text-[13px] text-text">
+                                    {pubs.map((p) => <li key={p.id}>{p.title}{p.year ? ` (${p.year})` : ''}</li>)}
+                                </ul>
+                            </ProfileSection>
+                        ) : null;
+                    })()}
+
+                    <ProfileSection title={<><Award size={16} className="inline mr-1.5 mb-0.5" /> Awards & Recognition</>} wide>
+                        <div className="flex flex-col gap-2.5 mb-1">
+                            {artist.awards.map((a) => (
+                                <div key={a.id} className="flex items-center gap-3 p-2.5 bg-bg-3 border border-border rounded-lg">
+                                    <Award size={20} className="text-accent shrink-0" />
+                                    <div>
+                                        <p className="text-[13px] font-semibold text-text-heading">{a.awardName}</p>
+                                        <p className="text-xs text-text-muted">{a.year}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        {(() => {
+                            const recognitions = artist.achievements.filter(a => a.type === 'Recognition');
+                            return recognitions.length > 0 ? (
+                                <>
+                                    <div className="h-px bg-border my-3" />
+                                    <div className="flex flex-wrap gap-2">
+                                        {recognitions.map((r) => <span key={r.id} className="text-xs px-2.5 py-1 bg-accent-glow text-accent-light border border-accent/30 rounded-full">{r.title}</span>)}
+                                    </div>
+                                </>
+                            ) : null;
+                        })()}
+                    </ProfileSection>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ProfileSection title={<><User size={16} className="inline mr-1.5 mb-0.5" /> Personal Details</>}>
-                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Full Name (Tamil)" value={artist.tamilName} /><InfoRow label="Full Name (English)" value={artist.englishName} /><InfoRow label="NIC Number" value={artist.nic} /><InfoRow label="Date of Birth" value={artist.dob} /><InfoRow label="Age" value={`${artist.age} years`} /><InfoRow label="Gender" value={artist.gender} /><InfoRow label="Telephone" value={artist.phone} /><InfoRow label="Permanent Address" value={artist.permanentAddress} /><InfoRow label="Current Address" value={artist.currentAddress} /></div>
+                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Full Name (Tamil)" value={artist.tamilName} /><InfoRow label="Full Name (English)" value={artist.englishName} /><InfoRow label="NIC Number" value={artist.nic} /><InfoRow label="Date of Birth" value={artist.dob} /><InfoRow label="Gender" value={artist.gender} /><InfoRow label="Telephone" value={artist.phone} /><InfoRow label="Permanent Address" value={artist.permanentAddress} /><InfoRow label="Current Address" value={artist.currentAddress ?? '—'} /></div>
                 </ProfileSection>
 
                 <ProfileSection title={<><GraduationCap size={16} className="inline mr-1.5 mb-0.5" /> Professional Information</>}>
-                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Art Category" value={artist.category} />{artist.literaryCategory && <InfoRow label="Literary Category" value={artist.literaryCategory} />}<InfoRow label="Expertise" value={artist.expertise} /><InfoRow label="Service Period" value={artist.servicePeriod} /></div>
+                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Art Category" value={artist.category} />{artist.literaryCategory && <InfoRow label="Literary Category" value={artist.literaryCategory} />}<InfoRow label="Expertise" value={artist.expertise ?? '—'} /><InfoRow label="Service Period" value={artist.servicePeriod ?? '—'} /></div>
                     <div className="h-px bg-border my-3" />
                     <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-2">Educational Qualifications</p>
                     <div className="flex flex-col gap-1 text-[13px] text-text">
@@ -173,43 +230,6 @@ function ArtistFullProfile({ artist, onBack }: { artist: ArtistProfile; onBack: 
                     <p className="text-[13px] text-text leading-relaxed">{artist.biography}</p>
                 </ProfileSection>
 
-                {artist.artisticWorks.length > 0 && (
-                    <ProfileSection title={<><Briefcase size={16} className="inline mr-1.5 mb-0.5" /> Artistic Works</>} wide>
-                        <div className="flex flex-wrap gap-2">
-                            {artist.artisticWorks.map((w) => <span key={w} className="text-xs px-2.5 py-1 bg-primary-glow text-primary-light border border-primary/30 rounded-full">{w}</span>)}
-                        </div>
-                    </ProfileSection>
-                )}
-
-                {artist.publications.length > 0 && (
-                    <ProfileSection title={<><BookOpen size={16} className="inline mr-1.5 mb-0.5" /> Publications</>} wide>
-                        <ul className="pl-4 flex flex-col gap-1.5 list-disc text-[13px] text-text">
-                            {artist.publications.map((p) => <li key={p}>{p}</li>)}
-                        </ul>
-                    </ProfileSection>
-                )}
-
-                <ProfileSection title={<><Award size={16} className="inline mr-1.5 mb-0.5" /> Awards & Recognition</>} wide>
-                    <div className="flex flex-col gap-2.5 mb-1">
-                        {artist.awards.map((a) => (
-                            <div key={a.name} className="flex items-center gap-3 p-2.5 bg-bg-3 border border-border rounded-lg">
-                                <Award size={20} className="text-accent shrink-0" />
-                                <div>
-                                    <p className="text-[13px] font-semibold text-text-heading">{a.name}</p>
-                                    <p className="text-xs text-text-muted">{a.year}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    {artist.recognitions.length > 0 && (
-                        <>
-                            <div className="h-px bg-border my-3" />
-                            <div className="flex flex-wrap gap-2">
-                                {artist.recognitions.map((r) => <span key={r} className="text-xs px-2.5 py-1 bg-accent-glow text-accent-light border border-accent/30 rounded-full">{r}</span>)}
-                            </div>
-                        </>
-                    )}
-                </ProfileSection>
             </div>
         </div>
     );

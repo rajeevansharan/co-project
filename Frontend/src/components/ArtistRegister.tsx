@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { Palette, User, Trophy, FolderOpen, CheckCircle, AlertTriangle, Paperclip, Send } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 type FormSection = 'personal' | 'professional' | 'achievements' | 'docs';
 
 export default function ArtistRegister() {
     const [section, setSection] = useState<FormSection>('personal');
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [form, setForm] = useState({
         nic: '', tamilName: '', englishName: '', otherNames: '',
         dob: '', gender: '', permanentAddress: '', currentAddress: '', phone: '',
@@ -23,9 +27,56 @@ export default function ArtistRegister() {
         { id: 'docs', label: 'Documents', icon: <FolderOpen className="inline mr-1 mb-0.5" size={16} /> },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSubmitted(true);
+        setSubmitting(true);
+        setError(null);
+        try {
+            const res = await fetch(`${API_URL}/api/artists`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nic: form.nic,
+                    tamilName: form.tamilName,
+                    englishName: form.englishName,
+                    otherNames: form.otherNames || null,
+                    dob: form.dob,
+                    gender: form.gender,
+                    permanentAddress: form.permanentAddress,
+                    currentAddress: form.currentAddress || null,
+                    phone: form.phone,
+                    education: form.education,
+                    category: form.category,
+                    literaryCategory: form.literaryCategory || null,
+                    expertise: form.expertise || null,
+                    servicePeriod: form.servicePeriod || null,
+                    biography: form.biography,
+                    achievements: [
+                        ...(form.publications ? [{ title: form.publications, type: 'Publication' }] : []),
+                        ...(form.artisticWorks ? [{ title: form.artisticWorks, type: 'Artistic Work' }] : []),
+                        ...(form.recognitions ? [{ title: form.recognitions, type: 'Recognition' }] : []),
+                    ],
+                    awards: form.awards
+                        ? form.awards.split('\n').filter(Boolean).map(line => {
+                            const match = line.match(/(.*?)\s*\((\d{4})\)/);
+                            return match
+                                ? { awardName: match[1].trim(), year: parseInt(match[2]) }
+                                : { awardName: line.trim(), year: new Date().getFullYear() };
+                        })
+                        : [],
+                }),
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                setSubmitted(true);
+            } else {
+                setError(json.message || 'Registration failed. Please try again.');
+            }
+        } catch {
+            setError('Network error. Please check your connection.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (submitted) {
@@ -151,7 +202,13 @@ export default function ArtistRegister() {
                         </div>
                         <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-border flex-col md:flex-row">
                             <button type="button" className="btn-secondary w-full md:w-auto" onClick={() => setSection('achievements')}>← Back</button>
-                            <button type="submit" className="btn-primary w-full md:w-auto bg-gradient-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 shadow-[0_4px_20px_rgba(34,197,94,0.3)] border-0"><Send size={18} className="inline mr-1.5" /> Submit Registration</button>
+                            {error && <p className="text-sm text-red-400 self-center">{error}</p>}
+                            <button type="submit" disabled={submitting} className="btn-primary w-full md:w-auto bg-gradient-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 shadow-[0_4px_20px_rgba(34,197,94,0.3)] border-0 disabled:opacity-60">
+                                {submitting
+                                    ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block mr-2" />
+                                    : <Send size={18} className="inline mr-1.5" />}
+                                {submitting ? 'Submitting…' : 'Submit Registration'}
+                            </button>
                         </div>
                     </div>
                 )}

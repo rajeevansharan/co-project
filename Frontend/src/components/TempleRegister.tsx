@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { Building2, Users, FileText, FolderOpen, CheckCircle, Info, AlertTriangle, Paperclip, Send, Landmark } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 type FormSection = 'details' | 'admin' | 'info' | 'docs';
 
 export default function TempleRegister() {
     const [section, setSection] = useState<FormSection>('details');
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [registeredId, setRegisteredId] = useState<string>('');
     const [form, setForm] = useState({
         templeName: '', address: '', telephone: '', email: '', website: '', gnDivision: '', dsDivision: '', district: '',
         bankName: '', bankBranch: '', accountNo: '', accountName: '', presidentName: '', secretaryName: '',
@@ -22,13 +27,50 @@ export default function TempleRegister() {
         { id: 'docs', label: 'Documents', icon: <FolderOpen className="inline mr-1 mb-0.5" size={16} /> },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSubmitted(true);
+        setSubmitting(true);
+        setError(null);
+        try {
+            const res = await fetch(`${API_URL}/api/temples`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    templeName: form.templeName,
+                    address: form.address,
+                    district: form.district,
+                    dsDivision: form.dsDivision,
+                    gnDivision: form.gnDivision,
+                    phone: form.telephone || null,
+                    email: form.email || null,
+                    website: form.website || null,
+                    bankName: form.bankName || null,
+                    bankBranch: form.bankBranch || null,
+                    accountNo: form.accountNo || null,
+                    accountName: form.accountName || null,
+                    presidentName: form.presidentName,
+                    secretaryName: form.secretaryName,
+                    history: form.history || null,
+                    festivals: form.festivals || null,
+                    specialPoojas: form.specialPoojas || null,
+                    socialActivities: form.socialActivities || null,
+                }),
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                setRegisteredId(json.data.templeRegNo);
+                setSubmitted(true);
+            } else {
+                setError(json.message || 'Registration failed. Please try again.');
+            }
+        } catch {
+            setError('Network error. Please check your connection.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (submitted) {
-        const fakeId = `TMP-2026-${Math.floor(Math.random() * 900 + 100)}`;
         return (
             <div className="p-5 md:p-8 flex flex-col gap-6 max-w-5xl w-full">
                 <div className="glass-card p-12 flex flex-col items-center text-center gap-4 animate-fade-up">
@@ -37,10 +79,10 @@ export default function TempleRegister() {
                     <p className="text-text-muted">Your temple registration has been submitted for review.</p>
                     <div className="bg-bg-3 border border-border rounded-xl px-8 py-4 flex flex-col gap-1 my-3">
                         <span className="text-xs text-text-muted uppercase tracking-wider">Your Temple Register ID</span>
-                        <span className="text-2xl md:text-3xl font-mono font-extrabold text-primary-light">{fakeId}</span>
+                        <span className="text-2xl md:text-3xl font-mono font-extrabold text-primary-light">{registeredId}</span>
                     </div>
                     <p className="text-[13px] text-text-muted max-w-[400px] mb-3">Please keep this ID for future reference. You will be notified once approved.</p>
-                    <button className="btn-primary" onClick={() => { setSubmitted(false); setForm({ templeName: '', address: '', telephone: '', email: '', website: '', gnDivision: '', dsDivision: '', district: '', bankName: '', bankBranch: '', accountNo: '', accountName: '', presidentName: '', secretaryName: '', history: '', festivals: '', specialPoojas: '', idols: '', socialActivities: '' }); setSection('details'); }}>
+                    <button className="btn-primary" onClick={() => { setSubmitted(false); setRegisteredId(''); setForm({ templeName: '', address: '', telephone: '', email: '', website: '', gnDivision: '', dsDivision: '', district: '', bankName: '', bankBranch: '', accountNo: '', accountName: '', presidentName: '', secretaryName: '', history: '', festivals: '', specialPoojas: '', idols: '', socialActivities: '' }); setSection('details'); }}>
                         Register Another Temple
                     </button>
                 </div>
@@ -165,8 +207,12 @@ export default function TempleRegister() {
                         </div>
                         <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-border flex-col md:flex-row">
                             <button type="button" className="btn-secondary w-full md:w-auto" onClick={() => setSection('info')}>← Back</button>
-                            <button type="submit" className="btn-primary w-full md:w-auto bg-gradient-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 shadow-[0_4px_20px_rgba(34,197,94,0.3)] border-0">
-                                <Send size={18} className="inline mr-1.5" /> Submit Registration
+                            {error && <p className="text-sm text-red-400 self-center">{error}</p>}
+                            <button type="submit" disabled={submitting} className="btn-primary w-full md:w-auto bg-gradient-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 shadow-[0_4px_20px_rgba(34,197,94,0.3)] border-0 disabled:opacity-60">
+                                {submitting
+                                    ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block mr-2" />
+                                    : <Send size={18} className="inline mr-1.5" />}
+                                {submitting ? 'Submitting…' : 'Submit Registration'}
                             </button>
                         </div>
                     </div>

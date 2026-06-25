@@ -1,69 +1,38 @@
 import { useState } from 'react';
 import { Building2, Search, MapPin, Map, Phone, User, Users, Landmark, History, Flame, HeartHandshake, FileText, File, ArrowLeft } from 'lucide-react';
 
-/* ── Mock Data ─────────────────── */
-const mockTemples: Record<string, TempleProfile> = {
-    'TMP-2026-001': {
-        regNo: 'TMP-2026-001', name: 'Sri Murugan Kovil', tamilName: 'ஸ்ரீ முருகன் கோவில்',
-        address: '24, Temple Road, Nallur, Jaffna', district: 'Jaffna', dsDivision: 'Nallur',
-        gnDivision: 'Nallur North', phone: '021-222-4567', email: 'srimurugan@temple.lk',
-        website: 'www.srimurugan.lk', bankName: 'Bank of Ceylon', bankBranch: 'Jaffna',
-        accountName: 'Sri Murugan Kovil Fund', accountNo: '1234567890',
-        history: 'Founded in 1842, this ancient temple is one of the most revered Hindu shrines in Northern Sri Lanka. It has been a center of worship for over 180 years.',
-        president: 'Mr. Rajendran Subramaniam', secretary: 'Mrs. Kumari Sivakumar',
-        festivals: ['Skanda Sashti', 'Thai Pusam', 'Chariot Festival'],
-        idols: ['Lord Murugan', 'Goddess Valli', 'Goddess Devayani'],
-        socialActivities: ['Free medical camp', 'Annual scholarship', 'Food donation program'],
-        status: 'Approved', createdAt: '2026-01-15',
-        documents: [
-            { type: 'Land Document', status: 'Verified' },
-            { type: 'Constitution', status: 'Verified' },
-            { type: 'Annual Report 2025', status: 'Verified' },
-        ],
-    },
-    'TMP-2026-002': {
-        regNo: 'TMP-2026-002', name: 'Koneswaram Temple', tamilName: 'கோணேஸ்வரம் கோயில்',
-        address: 'Swami Rock, Fort Frederick, Trincomalee', district: 'Trincomalee', dsDivision: 'Trincomalee Town',
-        gnDivision: 'Fort Frederick', phone: '026-223-5678', email: 'koneswaram@temple.lk',
-        website: 'www.koneswaram.lk', bankName: 'Peoples Bank', bankBranch: 'Trincomalee',
-        accountName: 'Koneswaram Temple Trust', accountNo: '9876543210',
-        history: 'One of the five ancient Shiva temples (Pancha Ishwarams) of Sri Lanka, perched on the famous Swami Rock overlooking the Indian Ocean.',
-        president: 'Mr. Balakumar Krishnan', secretary: 'Mr. Selvarajan Ponnusamy',
-        festivals: ['Maha Shivaratri', 'Navaratri', 'Karthigai Deepam'],
-        idols: ['Lord Shiva (Koneswaram)', 'Goddess Parvati', 'Lord Ganesha'],
-        socialActivities: ['Annadhanam (free meals)', 'Education trust', 'Medical assistance'],
-        status: 'Pending', createdAt: '2026-02-20',
-        documents: [
-            { type: 'Land Document', status: 'Pending' },
-            { type: 'Constitution', status: 'Verified' },
-        ],
-    },
-};
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export interface TempleProfile {
-    regNo: string; 
-    name: string; 
-    tamilName: string; 
-    address: string; 
-    district: string; 
-    dsDivision: string; 
-    gnDivision: string; 
-    phone: string; 
-    email: string; 
-    website: string; 
-    bankName: string; 
-    bankBranch: string; 
-    accountName: string; 
-    accountNo: string; 
-    history: string; 
-    president: string; 
-    secretary: string; 
-    festivals: string[]; 
-    idols: string[]; 
-    socialActivities: string[]; 
-    status: string; 
-    createdAt: string; 
-    documents: { type: string; status: string }[];
+    id: number;
+    templeRegNo: string;
+    templeName: string;
+    tamilName: string | null;
+    address: string;
+    district: string;
+    dsDivision: string;
+    gnDivision: string;
+    phone: string | null;
+    email: string | null;
+    website: string | null;
+    bankName: string | null;
+    bankBranch: string | null;
+    accountName: string | null;
+    accountNo: string | null;
+    history: string | null;
+    festivals: string | null;       // comma-separated from backend
+    idols: string | null;           // comma-separated from backend
+    socialActivities: string | null; // comma-separated from backend
+    status: string;
+    createdAt: string;
+    committee: { presidentName: string; secretaryName: string } | null;
+    documents: { id: number; documentType: string; fileUrl: string | null; status: string }[];
+}
+
+// Helper: split comma-separated string into array safely
+function toArray(val: string | null | undefined): string[] {
+    if (!val) return [];
+    return val.split(',').map(s => s.trim()).filter(Boolean);
 }
 
 export default function TempleSearch() {
@@ -73,14 +42,22 @@ export default function TempleSearch() {
     const [loading, setLoading] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
 
-    const handleSearch = () => {
+    const handleSearch = async () => {
         if (!query.trim()) return;
         setLoading(true); setNotFound(false); setResult(null); setShowProfile(false);
-        setTimeout(() => {
-            const found = mockTemples[query.trim().toUpperCase()];
-            if (found) setResult(found); else setNotFound(true);
+        try {
+            const res = await fetch(`${API_URL}/api/temples/${query.trim().toUpperCase()}`);
+            const json = await res.json();
+            if (res.ok && json.success) {
+                setResult(json.data);
+            } else {
+                setNotFound(true);
+            }
+        } catch {
+            setNotFound(true);
+        } finally {
             setLoading(false);
-        }, 700);
+        }
     };
 
     const handleKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter') handleSearch(); };
@@ -143,14 +120,14 @@ export default function TempleSearch() {
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 bg-bg-3 border border-border rounded-lg px-3 py-1.5 text-[13px] font-mono text-text-muted">
                             <Building2 size={16} className="text-text-muted" />
-                            <span>{result.regNo}</span>
+                            <span>{result.templeRegNo}</span>
                         </div>
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border ${result.status === 'Approved' ? 'bg-green-500/10 text-green-400 border-green-500/25' : 'bg-accent-glow text-accent-light border-accent/30'}`}>
                             {result.status}
                         </span>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-extrabold text-text-heading">{result.name}</h2>
+                        <h2 className="text-2xl font-extrabold text-text-heading">{result.templeName}</h2>
                         <p className="text-base text-text-muted leading-tight mt-1" style={{ fontFamily: "'Noto Sans Tamil', sans-serif" }}>{result.tamilName}</p>
                     </div>
 
@@ -158,9 +135,9 @@ export default function TempleSearch() {
                         <ResultField label={<><MapPin size={12} className="inline mr-1 mb-0.5" /> Address</>} value={result.address} />
                         <ResultField label={<><Map size={12} className="inline mr-1 mb-0.5" /> District</>} value={result.district} />
                         <ResultField label={<><Landmark size={12} className="inline mr-1 mb-0.5" /> DS Division</>} value={result.dsDivision} />
-                        <ResultField label={<><Phone size={12} className="inline mr-1 mb-0.5" /> Phone</>} value={result.phone} />
-                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> President</>} value={result.president} />
-                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> Secretary</>} value={result.secretary} />
+                        <ResultField label={<><Phone size={12} className="inline mr-1 mb-0.5" /> Phone</>} value={result.phone ?? '—'} />
+                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> President</>} value={result.committee?.presidentName ?? '—'} />
+                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> Secretary</>} value={result.committee?.secretaryName ?? '—'} />
                     </div>
 
                     <div className="flex items-center gap-3 pt-1">
@@ -197,25 +174,25 @@ function TempleFullProfile({ temple, onBack }: { temple: TempleProfile; onBack: 
             <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
                 <div className="w-[72px] h-[72px] rounded-2xl bg-primary-glow border border-primary/30 flex items-center justify-center text-primary shrink-0"><Building2 size={32} strokeWidth={1.5} /></div>
                 <div>
-                    <h2 className="text-[22px] font-extrabold text-text-heading mb-1">{temple.name}</h2>
+                    <h2 className="text-[22px] font-extrabold text-text-heading mb-1">{temple.templeName}</h2>
                     <p className="text-[15px] text-text-muted mb-1" style={{ fontFamily: "'Noto Sans Tamil', sans-serif" }}>{temple.tamilName}</p>
                     <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap text-xs text-text-muted mt-1.5">
-                        <span>{temple.regNo}</span><span>•</span><span>{temple.district}</span><span>•</span><span>Registered: {temple.createdAt}</span>
+                        <span>{temple.templeRegNo}</span><span>•</span><span>{temple.district}</span><span>•</span><span>Registered: {new Date(temple.createdAt).toLocaleDateString()}</span>
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ProfileSection title={<><FileText size={16} className="inline mr-1.5 mb-0.5" /> Temple Details</>}>
-                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Address" value={temple.address} /><InfoRow label="District" value={temple.district} /><InfoRow label="DS Division" value={temple.dsDivision} /><InfoRow label="GN Division" value={temple.gnDivision} /><InfoRow label="Telephone" value={temple.phone} /><InfoRow label="Email" value={temple.email} /><InfoRow label="Website" value={temple.website} /></div>
+                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Address" value={temple.address} /><InfoRow label="District" value={temple.district} /><InfoRow label="DS Division" value={temple.dsDivision} /><InfoRow label="GN Division" value={temple.gnDivision} /><InfoRow label="Telephone" value={temple.phone ?? '—'} /><InfoRow label="Email" value={temple.email ?? '—'} /><InfoRow label="Website" value={temple.website ?? '—'} /></div>
                 </ProfileSection>
 
                 <ProfileSection title={<><Users size={16} className="inline mr-1.5 mb-0.5" /> Administration</>}>
-                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="President" value={temple.president} /><InfoRow label="Secretary" value={temple.secretary} /></div>
+                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="President" value={temple.committee?.presidentName ?? '—'} /><InfoRow label="Secretary" value={temple.committee?.secretaryName ?? '—'} /></div>
                 </ProfileSection>
 
                 <ProfileSection title={<><Landmark size={16} className="inline mr-1.5 mb-0.5" /> Bank Details</>}>
-                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Bank Name" value={temple.bankName} /><InfoRow label="Branch" value={temple.bankBranch} /><InfoRow label="Account Name" value={temple.accountName} /><InfoRow label="Account No" value={temple.accountNo} /></div>
+                    <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Bank Name" value={temple.bankName ?? '—'} /><InfoRow label="Branch" value={temple.bankBranch ?? '—'} /><InfoRow label="Account Name" value={temple.accountName ?? '—'} /><InfoRow label="Account No" value={temple.accountNo ?? '—'} /></div>
                 </ProfileSection>
 
                 <ProfileSection title={<><History size={16} className="inline mr-1.5 mb-0.5" /> Temple History</>} wide>
@@ -224,28 +201,28 @@ function TempleFullProfile({ temple, onBack }: { temple: TempleProfile; onBack: 
 
                 <ProfileSection title={<><Flame size={16} className="inline mr-1.5 mb-0.5" /> Festivals & Poojas</>} wide>
                     <div className="flex flex-wrap gap-2">
-                        {temple.festivals.map((f) => <span key={f} className="text-xs px-2.5 py-1 bg-primary-glow text-primary-light border border-primary/30 rounded-full">{f}</span>)}
+                        {toArray(temple.festivals).map((f) => <span key={f} className="text-xs px-2.5 py-1 bg-primary-glow text-primary-light border border-primary/30 rounded-full">{f}</span>)}
                     </div>
                 </ProfileSection>
 
                 <ProfileSection title={<><User size={16} className="inline mr-1.5 mb-0.5" /> Temple Idols</>} wide>
                     <div className="flex flex-wrap gap-2">
-                        {temple.idols.map((i) => <span key={i} className="text-xs px-2.5 py-1 bg-accent-glow text-accent-light border border-accent/30 rounded-full">{i}</span>)}
+                        {toArray(temple.idols).map((i) => <span key={i} className="text-xs px-2.5 py-1 bg-accent-glow text-accent-light border border-accent/30 rounded-full">{i}</span>)}
                     </div>
                 </ProfileSection>
 
                 <ProfileSection title={<><HeartHandshake size={16} className="inline mr-1.5 mb-0.5" /> Social Activities</>} wide>
                     <ul className="pl-4 flex flex-col gap-1.5 list-disc text-[13px] text-text">
-                        {temple.socialActivities.map((a) => <li key={a}>{a}</li>)}
+                        {toArray(temple.socialActivities).map((a) => <li key={a}>{a}</li>)}
                     </ul>
                 </ProfileSection>
 
                 <ProfileSection title={<><File size={16} className="inline mr-1.5 mb-0.5" /> Documents</>} wide>
                     <div className="flex flex-col gap-2">
                         {temple.documents.map((d) => (
-                            <div key={d.type} className="flex items-center gap-2.5 p-2.5 bg-bg-3 rounded-lg border border-border">
+                            <div key={d.id} className="flex items-center gap-2.5 p-2.5 bg-bg-3 rounded-lg border border-border">
                                 <FileText size={20} className="text-text-muted shrink-0" />
-                                <span className="flex-1 text-[13px] text-text font-medium">{d.type}</span>
+                                <span className="flex-1 text-[13px] text-text font-medium">{d.documentType}</span>
                                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide border ${d.status === 'Verified' ? 'bg-green-500/10 text-green-400 border-green-500/25' : 'bg-accent-glow text-accent-light border-accent/30'}`}>{d.status}</span>
                             </div>
                         ))}
