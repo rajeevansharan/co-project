@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { LayoutDashboard, Search, FileSignature, ChevronRight, ChevronLeft, Flame } from 'lucide-react';
 
 export type Page = 'dashboard' | 'temple-search' | 'artist-search' | 'temple-register' | 'artist-register';
 
-const navItems: { id: Page; route: string; icon: string; label: string; group?: string }[] = [
-    { id: 'dashboard', route: '/', icon: '⊞', label: 'Dashboard' },
-    { id: 'temple-search', route: '/temple-search', icon: '🔍', label: 'Temple Search', group: 'Temples' },
-    { id: 'temple-register', route: '/temple-register', icon: '📝', label: 'Register Temple', group: 'Temples' },
-    { id: 'artist-search', route: '/artist-search', icon: '🔍', label: 'Artist Search', group: 'Artists' },
-    { id: 'artist-register', route: '/artist-register', icon: '📝', label: 'Register Artist', group: 'Artists' },
+const navItems: { id: Page; route: string; icon: React.ReactNode; label: string; group?: string }[] = [
+    { id: 'dashboard', route: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
+    { id: 'temple-search', route: '/temple-search', icon: <Search size={18} />, label: 'Temple Search', group: 'Temples' },
+    { id: 'temple-register', route: '/temple-register', icon: <FileSignature size={18} />, label: 'Register Temple', group: 'Temples' },
+    { id: 'artist-search', route: '/artist-search', icon: <Search size={18} />, label: 'Artist Search', group: 'Artists' },
+    { id: 'artist-register', route: '/artist-register', icon: <FileSignature size={18} />, label: 'Register Artist', group: 'Artists' },
 ];
 
 export default function Sidebar() {
@@ -26,8 +27,8 @@ export default function Sidebar() {
         <aside className={`bg-bg-2 border-r border-border flex flex-col transition-all duration-300 sticky top-0 md:h-screen shrink-0 ${collapsed ? 'w-[68px]' : 'w-[260px]'}`}>
             <div className="flex items-center justify-between p-5 border-b border-border gap-2">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center text-lg shrink-0 shadow-primary cursor-pointer" onClick={() => navigate('/')}>
-                        <span>🕉</span>
+                    <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center text-white shrink-0 shadow-primary cursor-pointer" onClick={() => navigate('/')}>
+                        <Flame size={20} strokeWidth={2.5} />
                     </div>
                     {!collapsed && (
                         <div className="flex flex-col overflow-hidden cursor-pointer" onClick={() => navigate('/')}>
@@ -41,7 +42,7 @@ export default function Sidebar() {
                     onClick={() => setCollapsed(!collapsed)}
                     title="Toggle sidebar"
                 >
-                    <span>{collapsed ? '›' : '‹'}</span>
+                    {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                 </button>
             </div>
 

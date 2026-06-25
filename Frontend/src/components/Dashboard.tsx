@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
+import { Building2, Palette, Clock, ClipboardList, ArrowRight } from 'lucide-react';
+
 const stats = [
-    { label: 'Total Temples', value: '1,248', change: '+12 this month', icon: '🛕', colorClass: 'bg-primary-glow border-primary/30 text-primary-light' },
-    { label: 'Total Artists', value: '3,571', change: '+47 this month', icon: '🎨', colorClass: 'bg-accent-glow border-accent/30 text-accent-light' },
-    { label: 'Pending Approvals', value: '34', change: '8 urgent', icon: '⏳', colorClass: 'bg-orange-500/10 border-orange-500/30 text-orange-400' },
-    { label: 'Recent Registrations', value: '89', change: 'Last 30 days', icon: '📋', colorClass: 'bg-green-500/10 border-green-500/30 text-green-400' },
+    { label: 'Total Temples', value: '1,248', change: '+12 this month', icon: <Building2 size={22} className="text-primary-light" />, colorClass: 'bg-primary-glow border-primary/30 text-primary-light' },
+    { label: 'Total Artists', value: '3,571', change: '+47 this month', icon: <Palette size={22} className="text-accent-light" />, colorClass: 'bg-accent-glow border-accent/30 text-accent-light' },
+    { label: 'Pending Approvals', value: '34', change: '8 urgent', icon: <Clock size={22} className="text-orange-400" />, colorClass: 'bg-orange-500/10 border-orange-500/30 text-orange-400' },
+    { label: 'Recent Registrations', value: '89', change: 'Last 30 days', icon: <ClipboardList size={22} className="text-green-400" />, colorClass: 'bg-green-500/10 border-green-500/30 text-green-400' },
 ];
 
 const recentTemples = [
@@ -145,20 +147,20 @@ export default function Dashboard() {
             {/* Quick Search Banner */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
                 <div className="glass-card p-5 md:p-6 flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/temple-search')}>
-                    <span className="text-3xl shrink-0">🛕</span>
+                    <span className="shrink-0 text-primary bg-primary/10 p-3 rounded-xl"><Building2 size={24} /></span>
                     <div>
                         <p className="text-sm font-bold text-text-heading mb-0.5">Temple Search</p>
                         <p className="text-xs text-text-muted">Search by Register ID (e.g. TMP-2026-001)</p>
                     </div>
-                    <span className="ml-auto text-xl text-text-muted transition-transform group-hover:text-primary-light group-hover:translate-x-1">→</span>
+                    <span className="ml-auto text-text-muted transition-transform group-hover:text-primary-light group-hover:translate-x-1"><ArrowRight size={18} /></span>
                 </div>
                 <div className="glass-card p-5 md:p-6 flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/artist-search')}>
-                    <span className="text-3xl shrink-0">🎨</span>
+                    <span className="shrink-0 text-accent-light bg-accent/10 p-3 rounded-xl"><Palette size={24} /></span>
                     <div>
                         <p className="text-sm font-bold text-text-heading mb-0.5">Artist Search</p>
                         <p className="text-xs text-text-muted">Search by NIC Number (e.g. 200312345678)</p>
                     </div>
-                    <span className="ml-auto text-xl text-text-muted transition-transform group-hover:text-primary-light group-hover:translate-x-1">→</span>
+                    <span className="ml-auto text-text-muted transition-transform group-hover:text-primary-light group-hover:translate-x-1"><ArrowRight size={18} /></span>
                 </div>
             </div>
         </div>

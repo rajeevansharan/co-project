@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Building2, Search, MapPin, Map, Phone, User, Users, Landmark, History, Flame, HeartHandshake, FileText, File, ArrowLeft } from 'lucide-react';
 
 /* ── Mock Data ─────────────────── */
 const mockTemples: Record<string, TempleProfile> = {
@@ -40,7 +41,29 @@ const mockTemples: Record<string, TempleProfile> = {
 };
 
 export interface TempleProfile {
-    regNo: string; name: string; tamilName: string; address: string; district: string; dsDivision: string; gnDivision: string; phone: string; email: string; website: string; bankName: string; bankBranch: string; accountName: string; accountNo: string; history: string; president: string; secretary: string; festivals: string[]; idols: string[]; socialActivities: string[]; status: string; createdAt: string; documents: { type: string; status: string }[];
+    regNo: string; 
+    name: string; 
+    tamilName: string; 
+    address: string; 
+    district: string; 
+    dsDivision: string; 
+    gnDivision: string; 
+    phone: string; 
+    email: string; 
+    website: string; 
+    bankName: string; 
+    bankBranch: string; 
+    accountName: string; 
+    accountNo: string; 
+    history: string; 
+    president: string; 
+    secretary: string; 
+    festivals: string[]; 
+    idols: string[]; 
+    socialActivities: string[]; 
+    status: string; 
+    createdAt: string; 
+    documents: { type: string; status: string }[];
 }
 
 export default function TempleSearch() {
@@ -65,8 +88,8 @@ export default function TempleSearch() {
     return (
         <div className="p-5 md:p-8 flex flex-col gap-6 max-w-4xl w-full">
             <div className="animate-fade-up">
-                <h1 className="text-2xl md:text-[26px] font-extrabold bg-gradient-to-br from-text-heading to-slate-100/70 bg-clip-text text-transparent mb-1">
-                    🛕 Temple Search
+                <h1 className="text-2xl md:text-[26px] font-extrabold bg-gradient-to-br from-text-heading to-slate-100/70 bg-clip-text text-transparent mb-1 flex items-center gap-2">
+                    <Building2 className="text-primary" size={28} /> Temple Search
                 </h1>
                 <p className="text-[13px] text-text-muted">Search registered temples by Temple Register ID</p>
             </div>
@@ -76,7 +99,7 @@ export default function TempleSearch() {
                     <label className="text-[13px] font-bold text-text-muted uppercase tracking-wider">Temple Register ID</label>
                     <div className="flex flex-col sm:flex-row gap-3 items-stretch">
                         <div className="flex-1 relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base pointer-events-none">🔍</span>
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"><Search size={18} /></span>
                             <input
                                 className="w-full h-12 md:h-[52px] pl-11 pr-4 bg-bg-3 border border-border rounded-xl text-text-heading text-[15px] font-medium tracking-wide outline-none transition-all placeholder-text-muted/70 focus:border-primary focus:bg-bg-2 focus:ring-4 focus:ring-primary-glow"
                                 type="text" placeholder="e.g. TMP-2026-001" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKey}
@@ -109,7 +132,7 @@ export default function TempleSearch() {
 
             {notFound && !loading && (
                 <div className="glass-card p-12 text-center flex flex-col items-center gap-3 animate-fade-in">
-                    <span className="text-5xl opacity-50">🔎</span>
+                    <Search size={48} className="text-text-muted opacity-50" />
                     <h3 className="text-lg text-text-heading font-bold">No Temple Found</h3>
                     <p className="text-sm text-text-muted">No temple registered with ID <strong className="text-text">{query}</strong>. Please check the ID and try again.</p>
                 </div>
@@ -119,7 +142,7 @@ export default function TempleSearch() {
                 <div className="glass-card p-6 md:p-8 flex flex-col gap-5 animate-fade-up">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 bg-bg-3 border border-border rounded-lg px-3 py-1.5 text-[13px] font-mono text-text-muted">
-                            <span className="text-base">🛕</span>
+                            <Building2 size={16} className="text-text-muted" />
                             <span>{result.regNo}</span>
                         </div>
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border ${result.status === 'Approved' ? 'bg-green-500/10 text-green-400 border-green-500/25' : 'bg-accent-glow text-accent-light border-accent/30'}`}>
@@ -132,12 +155,12 @@ export default function TempleSearch() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <ResultField label="📍 Address" value={result.address} />
-                        <ResultField label="🗺 District" value={result.district} />
-                        <ResultField label="🏛 DS Division" value={result.dsDivision} />
-                        <ResultField label="📞 Phone" value={result.phone} />
-                        <ResultField label="👤 President" value={result.president} />
-                        <ResultField label="✍ Secretary" value={result.secretary} />
+                        <ResultField label={<><MapPin size={12} className="inline mr-1 mb-0.5" /> Address</>} value={result.address} />
+                        <ResultField label={<><Map size={12} className="inline mr-1 mb-0.5" /> District</>} value={result.district} />
+                        <ResultField label={<><Landmark size={12} className="inline mr-1 mb-0.5" /> DS Division</>} value={result.dsDivision} />
+                        <ResultField label={<><Phone size={12} className="inline mr-1 mb-0.5" /> Phone</>} value={result.phone} />
+                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> President</>} value={result.president} />
+                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> Secretary</>} value={result.secretary} />
                     </div>
 
                     <div className="flex items-center gap-3 pt-1">
@@ -154,7 +177,7 @@ export default function TempleSearch() {
     );
 }
 
-function ResultField({ label, value }: { label: string; value: string }) {
+function ResultField({ label, value }: { label: React.ReactNode; value: string }) {
     return (
         <div className="flex flex-col gap-1 p-3 px-4 bg-bg-3 rounded-lg border border-border">
             <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider">{label}</span>
@@ -167,12 +190,12 @@ function TempleFullProfile({ temple, onBack }: { temple: TempleProfile; onBack: 
     return (
         <div className="flex flex-col gap-4 animate-fade-up">
             <div className="flex items-center justify-between">
-                <button className="btn-secondary" onClick={onBack}>← Back to Results</button>
+                <button className="btn-secondary" onClick={onBack}><ArrowLeft size={16} /> Back to Results</button>
                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border ${temple.status === 'Approved' ? 'bg-green-500/10 text-green-400 border-green-500/25' : 'bg-accent-glow text-accent-light border-accent/30'}`}>{temple.status}</span>
             </div>
 
             <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
-                <div className="w-[72px] h-[72px] rounded-2xl bg-primary-glow border border-primary/30 flex items-center justify-center text-4xl shrink-0">🛕</div>
+                <div className="w-[72px] h-[72px] rounded-2xl bg-primary-glow border border-primary/30 flex items-center justify-center text-primary shrink-0"><Building2 size={32} strokeWidth={1.5} /></div>
                 <div>
                     <h2 className="text-[22px] font-extrabold text-text-heading mb-1">{temple.name}</h2>
                     <p className="text-[15px] text-text-muted mb-1" style={{ fontFamily: "'Noto Sans Tamil', sans-serif" }}>{temple.tamilName}</p>
@@ -183,45 +206,45 @@ function TempleFullProfile({ temple, onBack }: { temple: TempleProfile; onBack: 
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ProfileSection title="📋 Temple Details">
+                <ProfileSection title={<><FileText size={16} className="inline mr-1.5 mb-0.5" /> Temple Details</>}>
                     <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Address" value={temple.address} /><InfoRow label="District" value={temple.district} /><InfoRow label="DS Division" value={temple.dsDivision} /><InfoRow label="GN Division" value={temple.gnDivision} /><InfoRow label="Telephone" value={temple.phone} /><InfoRow label="Email" value={temple.email} /><InfoRow label="Website" value={temple.website} /></div>
                 </ProfileSection>
 
-                <ProfileSection title="👥 Administration">
+                <ProfileSection title={<><Users size={16} className="inline mr-1.5 mb-0.5" /> Administration</>}>
                     <div className="grid grid-cols-1 gap-2.5"><InfoRow label="President" value={temple.president} /><InfoRow label="Secretary" value={temple.secretary} /></div>
                 </ProfileSection>
 
-                <ProfileSection title="🏦 Bank Details">
+                <ProfileSection title={<><Landmark size={16} className="inline mr-1.5 mb-0.5" /> Bank Details</>}>
                     <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Bank Name" value={temple.bankName} /><InfoRow label="Branch" value={temple.bankBranch} /><InfoRow label="Account Name" value={temple.accountName} /><InfoRow label="Account No" value={temple.accountNo} /></div>
                 </ProfileSection>
 
-                <ProfileSection title="📜 Temple History" wide>
+                <ProfileSection title={<><History size={16} className="inline mr-1.5 mb-0.5" /> Temple History</>} wide>
                     <p className="text-[13px] text-text leading-relaxed">{temple.history}</p>
                 </ProfileSection>
 
-                <ProfileSection title="🪔 Festivals & Poojas" wide>
+                <ProfileSection title={<><Flame size={16} className="inline mr-1.5 mb-0.5" /> Festivals & Poojas</>} wide>
                     <div className="flex flex-wrap gap-2">
                         {temple.festivals.map((f) => <span key={f} className="text-xs px-2.5 py-1 bg-primary-glow text-primary-light border border-primary/30 rounded-full">{f}</span>)}
                     </div>
                 </ProfileSection>
 
-                <ProfileSection title="🙏 Temple Idols" wide>
+                <ProfileSection title={<><User size={16} className="inline mr-1.5 mb-0.5" /> Temple Idols</>} wide>
                     <div className="flex flex-wrap gap-2">
                         {temple.idols.map((i) => <span key={i} className="text-xs px-2.5 py-1 bg-accent-glow text-accent-light border border-accent/30 rounded-full">{i}</span>)}
                     </div>
                 </ProfileSection>
 
-                <ProfileSection title="❤️ Social Activities" wide>
+                <ProfileSection title={<><HeartHandshake size={16} className="inline mr-1.5 mb-0.5" /> Social Activities</>} wide>
                     <ul className="pl-4 flex flex-col gap-1.5 list-disc text-[13px] text-text">
                         {temple.socialActivities.map((a) => <li key={a}>{a}</li>)}
                     </ul>
                 </ProfileSection>
 
-                <ProfileSection title="📁 Documents" wide>
+                <ProfileSection title={<><File size={16} className="inline mr-1.5 mb-0.5" /> Documents</>} wide>
                     <div className="flex flex-col gap-2">
                         {temple.documents.map((d) => (
                             <div key={d.type} className="flex items-center gap-2.5 p-2.5 bg-bg-3 rounded-lg border border-border">
-                                <span className="text-lg shrink-0">📄</span>
+                                <FileText size={20} className="text-text-muted shrink-0" />
                                 <span className="flex-1 text-[13px] text-text font-medium">{d.type}</span>
                                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide border ${d.status === 'Verified' ? 'bg-green-500/10 text-green-400 border-green-500/25' : 'bg-accent-glow text-accent-light border-accent/30'}`}>{d.status}</span>
                             </div>
@@ -233,7 +256,7 @@ function TempleFullProfile({ temple, onBack }: { temple: TempleProfile; onBack: 
     );
 }
 
-function ProfileSection({ title, children, wide = false }: { title: string; children: React.ReactNode; wide?: boolean }) {
+function ProfileSection({ title, children, wide = false }: { title: React.ReactNode; children: React.ReactNode; wide?: boolean }) {
     return (
         <div className={`glass-card p-5 md:p-6 ${wide ? 'col-span-1 md:col-span-2' : ''}`}>
             <h3 className="text-sm font-bold text-text-heading mb-3">{title}</h3>

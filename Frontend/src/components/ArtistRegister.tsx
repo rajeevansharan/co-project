@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Palette, User, Trophy, FolderOpen, CheckCircle, AlertTriangle, Paperclip, Send } from 'lucide-react';
 
 type FormSection = 'personal' | 'professional' | 'achievements' | 'docs';
 
@@ -15,11 +16,11 @@ export default function ArtistRegister() {
     const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
         setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-    const sections: { id: FormSection; label: string; icon: string }[] = [
-        { id: 'personal', label: 'Personal Details', icon: '👤' },
-        { id: 'professional', label: 'Professional Info', icon: '🎨' },
-        { id: 'achievements', label: 'Achievements', icon: '🏆' },
-        { id: 'docs', label: 'Documents', icon: '📁' },
+    const sections: { id: FormSection; label: string; icon: React.ReactNode }[] = [
+        { id: 'personal', label: 'Personal Details', icon: <User className="inline mr-1 mb-0.5" size={16} /> },
+        { id: 'professional', label: 'Professional Info', icon: <Palette className="inline mr-1 mb-0.5" size={16} /> },
+        { id: 'achievements', label: 'Achievements', icon: <Trophy className="inline mr-1 mb-0.5" size={16} /> },
+        { id: 'docs', label: 'Documents', icon: <FolderOpen className="inline mr-1 mb-0.5" size={16} /> },
     ];
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -31,7 +32,7 @@ export default function ArtistRegister() {
         return (
             <div className="p-5 md:p-8 flex flex-col gap-6 max-w-5xl w-full">
                 <div className="glass-card p-12 flex flex-col items-center text-center gap-4 animate-fade-up">
-                    <div className="w-20 h-20 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center text-4xl border-2 border-green-500/30 mb-2">✅</div>
+                    <div className="w-20 h-20 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center border-2 border-green-500/30 mb-2"><CheckCircle size={40} /></div>
                     <h2 className="text-2xl font-bold text-text-heading">Registration Submitted!</h2>
                     <p className="text-text-muted">Your artist / writer registration has been submitted for review.</p>
                     <div className="bg-bg-3 border border-border rounded-xl px-8 py-4 flex flex-col gap-1 my-3">
@@ -50,8 +51,8 @@ export default function ArtistRegister() {
     return (
         <div className="p-5 md:p-8 flex flex-col gap-6 max-w-5xl w-full">
             <div className="animate-fade-up">
-                <h1 className="text-2xl md:text-[26px] font-extrabold bg-gradient-to-br from-text-heading to-slate-100/70 bg-clip-text text-transparent mb-1">
-                    🎨 Artist Registration
+                <h1 className="text-2xl md:text-[26px] font-extrabold bg-gradient-to-br from-text-heading to-slate-100/70 bg-clip-text text-transparent mb-1 flex items-center gap-2">
+                    <Palette className="text-accent" size={28} /> Artist Registration
                 </h1>
                 <p className="text-[13px] text-text-muted">Register Artists, Writers &amp; Cultural Personalities</p>
             </div>
@@ -60,7 +61,7 @@ export default function ArtistRegister() {
                 {sections.map((s, i) => (
                     <button key={s.id} className={`flex-1 flex items-center justify-center gap-2.5 px-5 py-3.5 bg-transparent border border-transparent rounded-lg text-[14px] font-semibold cursor-pointer transition-all whitespace-nowrap ${section === s.id ? 'bg-primary-glow border-primary/30 text-primary-light' : 'text-text-muted hover:bg-black/5 hover:text-text'}`} onClick={() => setSection(s.id)}>
                         <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border transition-colors ${section === s.id ? 'bg-primary border-primary text-white' : 'bg-bg-3 border-border text-text-muted'}`}>{i + 1}</span>
-                        <span>{s.icon} {s.label}</span>
+                        <span className="flex items-center gap-1">{s.icon} {s.label}</span>
                     </button>
                 ))}
             </div>
@@ -68,7 +69,7 @@ export default function ArtistRegister() {
             <form onSubmit={handleSubmit} className="flex flex-col">
                 {section === 'personal' && (
                     <div className="glass-card p-6 md:p-8 animate-fade-up">
-                        <h3 className="text-lg font-bold text-text-heading">👤 Personal Details</h3>
+                        <h3 className="text-lg font-bold text-text-heading flex items-center gap-2"><User size={20} /> Personal Details</h3>
                         <div className="h-px bg-border my-6" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
                             <FormField label="NIC Number *" id="nic" value={form.nic} onChange={set('nic')} placeholder="12-digit NIC number" required />
@@ -93,7 +94,7 @@ export default function ArtistRegister() {
 
                 {section === 'professional' && (
                     <div className="glass-card p-6 md:p-8 animate-fade-up">
-                        <h3 className="text-lg font-bold text-text-heading">🎨 Professional Information</h3>
+                        <h3 className="text-lg font-bold text-text-heading flex items-center gap-2"><Palette size={20} /> Professional Information</h3>
                         <div className="h-px bg-border my-6" />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
                             <FormFieldSelect label="Art Category *" id="category" value={form.category} onChange={set('category')} required placeholder="Select Category" options={['Classical Dance', 'Folk Dance', 'Carnatic Music', 'Folk Music', 'Drama / Theatre', 'Visual Arts / Painting', 'Sculpture', 'Tamil Literature', 'Social Service', 'Cultural Personality', 'Other']} />
@@ -113,7 +114,7 @@ export default function ArtistRegister() {
 
                 {section === 'achievements' && (
                     <div className="glass-card p-6 md:p-8 animate-fade-up">
-                        <h3 className="text-lg font-bold text-text-heading">🏆 Achievements & Biography</h3>
+                        <h3 className="text-lg font-bold text-text-heading flex items-center gap-2"><Trophy size={20} /> Achievements & Biography</h3>
                         <div className="h-px bg-border my-6" />
                         <div className="flex flex-col gap-5">
                             <FormTextarea label="Publications" id="publications" value={form.publications} onChange={set('publications')} placeholder="List publications (title, year), one per line..." rows={3} />
@@ -131,7 +132,7 @@ export default function ArtistRegister() {
 
                 {section === 'docs' && (
                     <div className="glass-card p-6 md:p-8 animate-fade-up">
-                        <h3 className="text-lg font-bold text-text-heading">📁 Required Documents</h3>
+                        <h3 className="text-lg font-bold text-text-heading flex items-center gap-2"><FolderOpen size={20} /> Required Documents</h3>
                         <div className="h-px bg-border my-6" />
                         <div className="flex flex-col gap-4">
                             {[
@@ -146,11 +147,11 @@ export default function ArtistRegister() {
                             ))}
                         </div>
                         <div className="flex items-start gap-3 p-4 bg-black/5 border-l-4 border-primary rounded mt-6">
-                            <span>⚠️</span><p className="text-[13px] text-text-muted leading-relaxed">All documents must be clear and legible. Max 5MB per file. Accepted: PDF, JPG, PNG.</p>
+                            <AlertTriangle size={18} className="text-primary shrink-0" /><p className="text-[13px] text-text-muted leading-relaxed">All documents must be clear and legible. Max 5MB per file. Accepted: PDF, JPG, PNG.</p>
                         </div>
                         <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-border flex-col md:flex-row">
                             <button type="button" className="btn-secondary w-full md:w-auto" onClick={() => setSection('achievements')}>← Back</button>
-                            <button type="submit" className="btn-primary w-full md:w-auto bg-gradient-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 shadow-[0_4px_20px_rgba(34,197,94,0.3)] border-0">🚀 Submit Registration</button>
+                            <button type="submit" className="btn-primary w-full md:w-auto bg-gradient-to-br from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 shadow-[0_4px_20px_rgba(34,197,94,0.3)] border-0"><Send size={18} className="inline mr-1.5" /> Submit Registration</button>
                         </div>
                     </div>
                 )}
@@ -205,7 +206,7 @@ function UploadField({ label, required, hint }: { label: string; required: boole
             </div>
             <label className="inline-flex items-center px-4 py-2 bg-bg-3 border border-dashed border-border rounded-lg text-text text-[13px] cursor-pointer transition-all hover:border-primary hover:text-primary-light hover:bg-primary-glow whitespace-nowrap">
                 <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)} />
-                {fileName ? <span className="text-green-400 font-medium">✓ {fileName}</span> : <span>📎 Choose File</span>}
+                {fileName ? <span className="text-green-400 font-medium flex items-center gap-1"><CheckCircle size={14} /> {fileName}</span> : <span className="flex items-center gap-1"><Paperclip size={14} /> Choose File</span>}
             </label>
         </div>
     );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Palette, Search, MapPin, Phone, User, FileText, ArrowLeft, GraduationCap, Briefcase, Award, BookOpen } from 'lucide-react';
 
 /* ── Mock Data ─────────────────── */
 const mockArtists: Record<string, ArtistProfile> = {
@@ -36,8 +37,8 @@ export default function ArtistSearch() {
     return (
         <div className="p-5 md:p-8 flex flex-col gap-6 max-w-4xl w-full">
             <div className="animate-fade-up">
-                <h1 className="text-2xl md:text-[26px] font-extrabold bg-gradient-to-br from-text-heading to-slate-100/70 bg-clip-text text-transparent mb-1">
-                    🎨 Artist Search
+                <h1 className="text-2xl md:text-[26px] font-extrabold bg-gradient-to-br from-text-heading to-slate-100/70 bg-clip-text text-transparent mb-1 flex items-center gap-2">
+                    <Palette className="text-accent" size={28} /> Artist Search
                 </h1>
                 <p className="text-[13px] text-text-muted">Search registered artists, writers &amp; cultural personalities by NIC</p>
             </div>
@@ -47,7 +48,7 @@ export default function ArtistSearch() {
                     <label className="text-[13px] font-bold text-text-muted uppercase tracking-wider">NIC Number</label>
                     <div className="flex flex-col sm:flex-row gap-3 items-stretch">
                         <div className="flex-1 relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base pointer-events-none">🔍</span>
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"><Search size={18} /></span>
                             <input
                                 className="w-full h-12 md:h-[52px] pl-11 pr-4 bg-bg-3 border border-border rounded-xl text-text-heading text-[15px] font-medium tracking-wide outline-none transition-all placeholder-text-muted/70 focus:border-primary focus:bg-bg-2 focus:ring-4 focus:ring-primary-glow"
                                 type="text" placeholder="e.g. 199845623412" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKey}
@@ -80,7 +81,7 @@ export default function ArtistSearch() {
 
             {notFound && !loading && (
                 <div className="glass-card p-12 text-center flex flex-col items-center gap-3 animate-fade-in">
-                    <span className="text-5xl opacity-50">🔎</span>
+                    <Search size={48} className="text-text-muted opacity-50" />
                     <h3 className="text-lg text-text-heading font-bold">No Artist Found</h3>
                     <p className="text-sm text-text-muted">No artist registered with NIC <strong className="text-text">{query}</strong>. Please verify the NIC number and try again.</p>
                 </div>
@@ -90,7 +91,7 @@ export default function ArtistSearch() {
                 <div className="glass-card p-6 md:p-8 flex flex-col gap-5 animate-fade-up">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 bg-bg-3 border border-border rounded-lg px-3 py-1.5 text-[13px] font-mono text-text-muted">
-                            <span className="text-base">🎨</span>
+                            <Palette size={16} className="text-text-muted" />
                             <span>NIC: {result.nic}</span>
                         </div>
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border ${result.status === 'Approved' ? 'bg-green-500/10 text-green-400 border-green-500/25' : 'bg-accent-glow text-accent-light border-accent/30'}`}>
@@ -103,12 +104,12 @@ export default function ArtistSearch() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <ResultField label="📍 Address" value={result.currentAddress} />
-                        <ResultField label="🎭 Category" value={result.category} />
-                        <ResultField label="🎂 Age" value={`${result.age} years`} />
-                        <ResultField label="📞 Phone" value={result.phone} />
-                        <ResultField label="🏫 Education" value={result.education.split('\n')[0]} />
-                        <ResultField label="⏱ Service Period" value={result.servicePeriod} />
+                        <ResultField label={<><MapPin size={12} className="inline mr-1 mb-0.5" /> Address</>} value={result.currentAddress} />
+                        <ResultField label={<><Palette size={12} className="inline mr-1 mb-0.5" /> Category</>} value={result.category} />
+                        <ResultField label={<><User size={12} className="inline mr-1 mb-0.5" /> Age</>} value={`${result.age} years`} />
+                        <ResultField label={<><Phone size={12} className="inline mr-1 mb-0.5" /> Phone</>} value={result.phone} />
+                        <ResultField label={<><GraduationCap size={12} className="inline mr-1 mb-0.5" /> Education</>} value={result.education.split('\n')[0]} />
+                        <ResultField label={<><Briefcase size={12} className="inline mr-1 mb-0.5" /> Service Period</>} value={result.servicePeriod} />
                     </div>
 
                     <div className="flex items-center gap-3 pt-1">
@@ -125,7 +126,7 @@ export default function ArtistSearch() {
     );
 }
 
-function ResultField({ label, value }: { label: string; value: string }) {
+function ResultField({ label, value }: { label: React.ReactNode; value: string }) {
     return (
         <div className="flex flex-col gap-1 p-3 px-4 bg-bg-3 rounded-lg border border-border">
             <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider">{label}</span>
@@ -138,12 +139,12 @@ function ArtistFullProfile({ artist, onBack }: { artist: ArtistProfile; onBack: 
     return (
         <div className="flex flex-col gap-4 animate-fade-up">
             <div className="flex items-center justify-between">
-                <button className="btn-secondary" onClick={onBack}>← Back to Results</button>
+                <button className="btn-secondary" onClick={onBack}><ArrowLeft size={16} /> Back to Results</button>
                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border ${artist.status === 'Approved' ? 'bg-green-500/10 text-green-400 border-green-500/25' : 'bg-accent-glow text-accent-light border-accent/30'}`}>{artist.status}</span>
             </div>
 
             <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
-                <div className="w-[72px] h-[72px] rounded-2xl bg-accent-glow border border-accent/30 flex items-center justify-center text-4xl shrink-0">🎨</div>
+                <div className="w-[72px] h-[72px] rounded-2xl bg-accent-glow border border-accent/30 flex items-center justify-center text-accent shrink-0"><Palette size={32} strokeWidth={1.5} /></div>
                 <div>
                     <h2 className="text-[22px] font-extrabold text-text-heading mb-1">{artist.englishName}</h2>
                     <p className="text-[15px] text-text-muted mb-1" style={{ fontFamily: "'Noto Sans Tamil', sans-serif" }}>{artist.tamilName}</p>
@@ -155,11 +156,11 @@ function ArtistFullProfile({ artist, onBack }: { artist: ArtistProfile; onBack: 
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ProfileSection title="👤 Personal Details">
+                <ProfileSection title={<><User size={16} className="inline mr-1.5 mb-0.5" /> Personal Details</>}>
                     <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Full Name (Tamil)" value={artist.tamilName} /><InfoRow label="Full Name (English)" value={artist.englishName} /><InfoRow label="NIC Number" value={artist.nic} /><InfoRow label="Date of Birth" value={artist.dob} /><InfoRow label="Age" value={`${artist.age} years`} /><InfoRow label="Gender" value={artist.gender} /><InfoRow label="Telephone" value={artist.phone} /><InfoRow label="Permanent Address" value={artist.permanentAddress} /><InfoRow label="Current Address" value={artist.currentAddress} /></div>
                 </ProfileSection>
 
-                <ProfileSection title="🎓 Professional Information">
+                <ProfileSection title={<><GraduationCap size={16} className="inline mr-1.5 mb-0.5" /> Professional Information</>}>
                     <div className="grid grid-cols-1 gap-2.5"><InfoRow label="Art Category" value={artist.category} />{artist.literaryCategory && <InfoRow label="Literary Category" value={artist.literaryCategory} />}<InfoRow label="Expertise" value={artist.expertise} /><InfoRow label="Service Period" value={artist.servicePeriod} /></div>
                     <div className="h-px bg-border my-3" />
                     <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-2">Educational Qualifications</p>
@@ -168,12 +169,12 @@ function ArtistFullProfile({ artist, onBack }: { artist: ArtistProfile; onBack: 
                     </div>
                 </ProfileSection>
 
-                <ProfileSection title="📝 Biography" wide>
+                <ProfileSection title={<><FileText size={16} className="inline mr-1.5 mb-0.5" /> Biography</>} wide>
                     <p className="text-[13px] text-text leading-relaxed">{artist.biography}</p>
                 </ProfileSection>
 
                 {artist.artisticWorks.length > 0 && (
-                    <ProfileSection title="🎭 Artistic Works" wide>
+                    <ProfileSection title={<><Briefcase size={16} className="inline mr-1.5 mb-0.5" /> Artistic Works</>} wide>
                         <div className="flex flex-wrap gap-2">
                             {artist.artisticWorks.map((w) => <span key={w} className="text-xs px-2.5 py-1 bg-primary-glow text-primary-light border border-primary/30 rounded-full">{w}</span>)}
                         </div>
@@ -181,18 +182,18 @@ function ArtistFullProfile({ artist, onBack }: { artist: ArtistProfile; onBack: 
                 )}
 
                 {artist.publications.length > 0 && (
-                    <ProfileSection title="📚 Publications" wide>
+                    <ProfileSection title={<><BookOpen size={16} className="inline mr-1.5 mb-0.5" /> Publications</>} wide>
                         <ul className="pl-4 flex flex-col gap-1.5 list-disc text-[13px] text-text">
                             {artist.publications.map((p) => <li key={p}>{p}</li>)}
                         </ul>
                     </ProfileSection>
                 )}
 
-                <ProfileSection title="🏆 Awards & Recognition" wide>
+                <ProfileSection title={<><Award size={16} className="inline mr-1.5 mb-0.5" /> Awards & Recognition</>} wide>
                     <div className="flex flex-col gap-2.5 mb-1">
                         {artist.awards.map((a) => (
                             <div key={a.name} className="flex items-center gap-3 p-2.5 bg-bg-3 border border-border rounded-lg">
-                                <span className="text-xl shrink-0">🥇</span>
+                                <Award size={20} className="text-accent shrink-0" />
                                 <div>
                                     <p className="text-[13px] font-semibold text-text-heading">{a.name}</p>
                                     <p className="text-xs text-text-muted">{a.year}</p>
@@ -214,7 +215,7 @@ function ArtistFullProfile({ artist, onBack }: { artist: ArtistProfile; onBack: 
     );
 }
 
-function ProfileSection({ title, children, wide = false }: { title: string; children: React.ReactNode; wide?: boolean }) {
+function ProfileSection({ title, children, wide = false }: { title: React.ReactNode; children: React.ReactNode; wide?: boolean }) {
     return (
         <div className={`glass-card p-5 md:p-6 ${wide ? 'col-span-1 md:col-span-2' : ''}`}>
             <h3 className="text-sm font-bold text-text-heading mb-3">{title}</h3>
