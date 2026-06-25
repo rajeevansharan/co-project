@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Temple ───────────────────────────────────────────────────────────────────
+
+model Temple {
+  id               Int      @id @default(autoincrement())
+  templeRegNo      String   @unique
+  templeName       String
+  tamilName        String?
+  address          String
+  district         String
+  dsDivision       String
+  gnDivision       String
+  phone            String?
+  email            String?
+  website          String?
+  bankName         String?
+  bankBranch       String?
+  accountName      String?
+  accountNo        String?
+  history          String?  @db.Text
+  festivals        String?  @db.Text  // comma-separated list
+  idols            String?  @db.Text  // comma-separated list
+  socialActivities String?  @db.Text  // comma-separated list
+  specialPoojas    String?  @db.Text
+  status           String   @default("Pending") // Pending | Approved | Rejected
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  committee  TempleCommittee?
+  documents  TempleDocument[]
+
+  @@map("temples")
+}
+
+model TempleCommittee {
+  id            Int    @id @default(autoincrement())
+  templeId      Int    @unique
+  presidentName String
+  secretaryName String
+
+  temple Temple @relation(fields: [templeId], references: [id], onDelete: Cascade)
+
+  @@map("temple_committees")
+}
+
+model TempleDocument {
+  id           Int    @id @default(autoincrement())
+  templeId     Int
+  documentType String  // Land Document | Constitution | Annual Report | Festival Report
+  fileUrl      String?
+  status       String  @default("Pending") // Pending | Verified
+
+  temple Temple @relation(fields: [templeId], references: [id], onDelete: Cascade)
+
+  @@map("temple_documents")
+}
+
+// ─── Artist ───────────────────────────────────────────────────────────────────
+
+model Artist {
+  id               Int      @id @default(autoincrement())
+  nic              String   @unique
+  tamilName        String
+  englishName      String
+  otherNames       String?
+  dob              String
+  gender           String
+  permanentAddress String   @db.Text
+  currentAddress   String?  @db.Text
+  phone            String
+  education        String   @db.Text
+  category         String
+  literaryCategory String?
+  expertise        String?  @db.Text
+  servicePeriod    String?
+  biography        String   @db.Text
+  status           String   @default("Pending") // Pending | Approved | Rejected
+  registeredDate   DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  achievements ArtistAchievement[]
+  awards       ArtistAward[]
+
+  @@map("artists")
+}
+
+model ArtistAchievement {
+  id          Int    @id @default(autoincrement())
+  artistId    Int
+  title       String
+  year        Int?
+  description String? @db.Text
+  // type examples: "Publication" | "Artistic Work" | "Recognition"
+  type        String  @default("Artistic Work")
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@map("artist_achievements")
+}
+
+model ArtistAward {
+  id        Int    @id @default(autoincrement())
+  artistId  Int
+  awardName String
+  year      Int
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@map("artist_awards")
+}
